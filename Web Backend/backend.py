@@ -1,6 +1,7 @@
 
 import pymongo
 import json
+import datetime
 from bottle import Bottle, request, response, run
 
 app = Bottle()
@@ -29,10 +30,29 @@ def index():
     # return all users with valid location coordinates
     all_users = users.find( { "$and": [{"latitude" : {"$exists": True}}, {"longitude": {"$exists": True}}] })
 
+    # reference time (used for time code)
+    one_day_ago = datetime.datetime.utcnow() - datetime.timedelta(days=1)
+    one_week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+
+    print "%s %s" % (one_day_ago, one_week_ago)
+
     # create array of locations
     location_list = []
 
     for user in all_users:
+
+        # determine time code
+        createdAt = user.get('createdAt', None)
+        time_code = 0
+
+        if createdAt > one_day_ago.isoformat():
+            time_code = 2
+
+        elif createdAt > one_week_ago.isoformat():
+            time_code = 1
+
+        else: 
+            time_code = 0
 
         country = user.get('country', None)
         state = user.get('state', None)
@@ -45,10 +65,10 @@ def index():
             continue
 
         if city is None:
-            location_list.append([country, lat, lng])
+            location_list.append([country, lat, lng, time_code])
 
         else:
-            location_list.append(["%s, %s" % (city, state), lat, lng])
+            location_list.append(["%s, %s" % (city, state), lat, lng, time_code])
 
 
     # city_list = users.distinct("city")
@@ -57,10 +77,13 @@ def index():
 
 
 if __name__ == '__main__':
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option("--host", dest="host", default="localhost",
-                      help="hostname or ip address", metavar="host")
-    parser.add_option("--port", dest="port", default=8080,
-                      help="port number", metavar="port")
-    run(app, host='localhost', port=8082)
+    # from optparse import OptionParser
+    # parser = OptionParser()
+    # parser.add_option("--host", dest="host", default="localhost",
+    #                   help="hostname or ip address", metavar="host")
+    # parser.add_option("--port", dest="port", default=8080,
+    #                   help="port number", metavar="port")
+    # run(app, host=options.host, port=int(options.port))
+
+    run(app, host='localhost', port=80)
+
