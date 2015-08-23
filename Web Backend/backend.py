@@ -33,8 +33,7 @@ def index():
     # reference time (used for time code)
     one_day_ago = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     one_week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-
-    print "%s %s" % (one_day_ago, one_week_ago)
+    # print "%s %s" % (one_day_ago, one_week_ago)
 
     # create array of locations
     location_list = []
@@ -53,7 +52,8 @@ def index():
 
         else: 
             time_code = 0
-
+        
+        # location information
         country = user.get('country', None)
         state = user.get('state', None)
         city = user.get('city', None)
@@ -64,12 +64,20 @@ def index():
         if country is None:
             continue
 
+        # set location_str
+        location_str = ""
+
         if city is None:
-            location_list.append([country, lat, lng, time_code])
+            location_str = country
+        
+        elif state is None:
+            location_str = "%s, %s" % (city, country)
 
         else:
-            location_list.append(["%s, %s" % (city, state), lat, lng, time_code])
+            location_str = "%s, %s" % (city, state)
 
+        # add to list
+        location_list.append([location_str, lat, lng, time_code])
 
     # city_list = users.distinct("city")
 
@@ -85,5 +93,5 @@ if __name__ == '__main__':
     #                   help="port number", metavar="port")
     # run(app, host=options.host, port=int(options.port))
 
-    run(app, host='localhost', port=80)
+    run(app, host='172.31.16.215', port=80)
 
