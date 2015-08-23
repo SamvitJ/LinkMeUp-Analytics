@@ -4,3 +4,6 @@ last_updated.txt
 # other
 Whitepages Data/
 Web Backend/test_query.py
+
+# python
+*.pyc
