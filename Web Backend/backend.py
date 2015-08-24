@@ -33,6 +33,7 @@ def index():
     # reference time (used for time code)
     one_day_ago = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     one_week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+    one_hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
     # print "%s %s" % (one_day_ago, one_week_ago)
 
     # create array of locations
@@ -44,7 +45,10 @@ def index():
         createdAt = user.get('createdAt', None)
         time_code = 0
 
-        if createdAt > one_day_ago.isoformat():
+        if createdAt > one_hour_ago.isoformat():
+            time_code = 3
+
+        elif createdAt > one_day_ago.isoformat():
             time_code = 2
 
         elif createdAt > one_week_ago.isoformat():

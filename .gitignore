@@ -1,9 +1,13 @@
 # ignore local config file
 last_updated.txt
 
-# other
-Whitepages Data/
+# debug
+output_analytics.txt
+errors_analytics.txt
 Web Backend/test_query.py
 
 # python
 *.pyc
+
+# sensitive
+Whitepages Data/
