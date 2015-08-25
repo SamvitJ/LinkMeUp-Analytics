@@ -63,20 +63,32 @@ def index():
         city = user.get('city', None)
 
         lat = user.get('latitude', None)
+        if lat is not None:
+            print "lat (before): %f" % lat
+            lat = round(lat, 2)
+            print "lat (after): %f" % lat
+
         lng = user.get('longitude', None)
-        
-        if country is None:
-            continue
+        if lng is not None:
+            print "lat (before): %f" % lng
+            lng = round(lng, 2)
+            print "lat (after): %f" % lng
 
         # set location_str
         location_str = ""
 
-        if city is None:
+        if country is None:
+            location_str = ""
+
+        # country not None
+        elif city is None:
             location_str = country
         
+        # country and city not None
         elif state is None:
             location_str = "%s, %s" % (city, country)
 
+        # country, cit, state not None
         else:
             location_str = "%s, %s" % (city, state)
 
