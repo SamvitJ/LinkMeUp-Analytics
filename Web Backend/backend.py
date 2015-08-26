@@ -2,7 +2,10 @@
 import pymongo
 import json
 import datetime
+import time
+import pytz
 from bottle import Bottle, request, response, run
+import cherrypy
 
 app = Bottle()
 
@@ -17,7 +20,10 @@ def enable_cors():
 
 @app.route('/', method=['OPTIONS', 'GET'])
 def index():
-    
+
+    # start time
+    # start_time = time.time()
+
     # connect to mongoDB
     connection = pymongo.MongoClient('localhost', 27017)
 
@@ -27,8 +33,14 @@ def index():
     # get handle for users collection
     users = db.users
 
+    # mongo init time
+    # mongo_init_time = time.time()
+
     # return all users with valid location coordinates
-    all_users = users.find( { "$and": [{"latitude" : {"$exists": True}}, {"longitude": {"$exists": True}}] })
+    all_users = users.find( { "$and": [{"latitude" : {"$ne": None}}, {"longitude": {"$ne": None}}] })
+
+    # mongo query time
+    # mongo_query_time = time.time()
 
     # reference time (used for time code)
     one_day_ago = datetime.datetime.utcnow() - datetime.timedelta(days=1)
@@ -64,15 +76,11 @@ def index():
 
         lat = user.get('latitude', None)
         if lat is not None:
-            print "lat (before): %f" % lat
             lat = round(lat, 2)
-            print "lat (after): %f" % lat
 
         lng = user.get('longitude', None)
         if lng is not None:
-            print "lat (before): %f" % lng
             lng = round(lng, 2)
-            print "lat (after): %f" % lng
 
         # set location_str
         location_str = ""
@@ -97,6 +105,18 @@ def index():
 
     # city_list = users.distinct("city")
 
+    # data generation time
+    # data_gen_time = time.time()
+
+    # print time taken
+    # print "%f %f %f" % (mongo_init_time - start_time,
+    #                     mongo_query_time - mongo_init_time,
+    #                     data_gen_time - mongo_query_time)
+
+    # print time of request
+    pacific = pytz.timezone("US/Pacific")
+    print datetime.datetime.now(pacific)
+
     return json.dumps({"locations": location_list})
 
 
@@ -109,5 +129,5 @@ if __name__ == '__main__':
     #                   help="port number", metavar="port")
     # run(app, host=options.host, port=int(options.port))
 
-    run(app, host='172.31.16.215', port=80)
+    run(app, host='172.31.16.215', port=80, server='cherrypy')
 
