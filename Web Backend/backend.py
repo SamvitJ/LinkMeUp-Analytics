@@ -53,37 +53,12 @@ def index():
 
     for user in all_users:
 
-        # determine time code
-        createdAt = user.get('createdAt', None)
-        time_code = 0
+        # location str
+        location_str = ""
 
-        if createdAt > one_hour_ago.isoformat():
-            time_code = 3
-
-        elif createdAt > one_day_ago.isoformat():
-            time_code = 2
-
-        elif createdAt > one_week_ago.isoformat():
-            time_code = 1
-
-        else: 
-            time_code = 0
-        
-        # location information
         country = user.get('country', None)
         state = user.get('state', None)
         city = user.get('city', None)
-
-        lat = user.get('latitude', None)
-        if lat is not None:
-            lat = round(lat, 2)
-
-        lng = user.get('longitude', None)
-        if lng is not None:
-            lng = round(lng, 2)
-
-        # set location_str
-        location_str = ""
 
         if country is None:
             location_str = ""
@@ -96,11 +71,41 @@ def index():
         elif state is None:
             location_str = "%s, %s" % (city, country)
 
-        # country, cit, state not None
+        # country, city, state not None
         else:
             location_str = "%s, %s" % (city, state)
 
-        # add to list
+        # latitude/longitude
+        lat = user.get('latitude', None)
+        if lat is not None:
+            lat = round(lat, 2)
+
+        lng = user.get('longitude', None)
+        if lng is not None:
+            lng = round(lng, 2)
+
+        # determine time code
+        createdAt = user.get('createdAt', None)
+        time_code = 3
+
+        if createdAt >= one_hour_ago.isoformat():
+            time_code = 0
+
+        elif createdAt >= one_day_ago.isoformat():
+            time_code = 1
+
+        elif createdAt >= one_week_ago.isoformat():
+            time_code = 2
+
+        else:
+            time_code = 3
+
+        # if location string/time code pair already contained, skip
+        if any(loc[0] == location_str and loc[3] == time_code for loc in location_list):
+            # print "%s %s %u" % (user.get('username', None), location_str, time_code)
+            continue
+        
+        # otherwise, add to list
         location_list.append([location_str, lat, lng, time_code])
 
     # city_list = users.distinct("city")
