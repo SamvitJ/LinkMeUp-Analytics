@@ -1,4 +1,3 @@
-
 import pymongo
 import json
 import datetime
@@ -9,20 +8,15 @@ import cherrypy
 
 app = Bottle()
 
-# this is the handler for the default path of the web server
-
 @app.hook('after_request')
 def enable_cors():
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
 
-
+# this is the handler for the default path of the web server
 @app.route('/', method=['OPTIONS', 'GET'])
 def index():
-
-    # start time
-    # start_time = time.time()
 
     # connect to mongoDB
     connection = pymongo.MongoClient('localhost', 27017)
@@ -33,20 +27,14 @@ def index():
     # get handle for users collection
     users = db.users
 
-    # mongo init time
-    # mongo_init_time = time.time()
-
     # return all users with valid location coordinates
     all_users = users.find( { "$and": [{"latitude" : {"$ne": None}}, {"longitude": {"$ne": None}}] })
-
-    # mongo query time
-    # mongo_query_time = time.time()
 
     # reference time (used for time code)
     one_day_ago = datetime.datetime.utcnow() - datetime.timedelta(days=1)
     one_week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
     one_hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    # print "%s %s" % (one_day_ago, one_week_ago)
+    # print "%s %s %s" % (one_day_ago, one_week_ago, one_hour_ago)
 
     # create array of locations
     location_list = []
@@ -76,6 +64,7 @@ def index():
             location_str = "%s, %s" % (city, state)
 
         # latitude/longitude
+        # rounded to nearest 0.7 miles to hide exact user location
         lat = user.get('latitude', None)
         if lat is not None:
             lat = round(lat, 2)
@@ -107,16 +96,6 @@ def index():
         
         # otherwise, add to list
         location_list.append([location_str, lat, lng, time_code])
-
-    # city_list = users.distinct("city")
-
-    # data generation time
-    # data_gen_time = time.time()
-
-    # print time taken
-    # print "%f %f %f" % (mongo_init_time - start_time,
-    #                     mongo_query_time - mongo_init_time,
-    #                     data_gen_time - mongo_query_time)
 
     # print time of request
     pacific = pytz.timezone("US/Pacific")
