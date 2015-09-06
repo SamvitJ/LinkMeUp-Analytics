@@ -23,31 +23,39 @@ file_path = os.path.join(script_dir, "last_updated.txt")
 
 if os.path.isfile(file_path):
     with open (file_path, "r") as config_file:
-        old_time = config_file.read().replace('\n', '')
-        old_time_datetime = pytz.utc.localize(dateutil.parser.parse(old_time))
-        print "Pacific: %s  UTC: %s" % (old_time_datetime.astimezone(pytz.timezone('US/Pacific')), old_time)
+        old_time_str = config_file.read().replace('\n', '')
+        old_time_datetime = dateutil.parser.parse(old_time_str)
+        old_time_localized = pytz.utc.localize(old_time_datetime)
+        print "Old -- Pacific: %s  UTC: %s" % (old_time_localized.astimezone(pytz.timezone('US/Pacific')), old_time_str)
 
 # record new last_updated time
-new_time = datetime.datetime.utcnow().isoformat()
+new_time_datetime = datetime.datetime.utcnow()
+new_time_str = new_time_datetime.isoformat()
+new_time_localized = pytz.utc.localize(new_time_datetime)
+print "New -- Pacific: %s  UTC: %s" % (new_time_localized.astimezone(pytz.timezone('US/Pacific')), new_time_str)
 
 # get data from Parse
-user_data = returnClassData("_User", sort_by="createdAt", last_updated=old_time, new_updated=new_time)
-link_data = returnClassData("Link", last_updated=old_time, new_updated=new_time)
-logs_data = returnClassData("Logs", last_updated=old_time, new_updated=new_time)
+user_data = returnClassData("_User", sort_by="createdAt", last_updated=old_time_str, new_updated=new_time_str)
+link_data = returnClassData("Link", last_updated=old_time_str, new_updated=new_time_str)
+logs_data = returnClassData("Logs", last_updated=old_time_str, new_updated=new_time_str)
+
+# exit if no data returned
+if user_data is None or link_data is None or logs_data is None:
+    sys.exit("Error getting Parse data from module")
 
 # print "New user data: %s \n" % user_data
 # print "New link data: %s \n" % link_data
 # print "New logs data: %s \n" % logs_data
 
-# write to config file
+# write new_time to config file
 with open (file_path, "w") as config_file:
-    config_file.write(new_time)
+    config_file.write(new_time_str)
     config_file.truncate()
 
 # initialization
 user_stats_list = []
 
-print "Number of users: %u" % len(user_data) 
+print "Number of new/updated users: %u" % len(user_data)
 
 # initialize mongo connection
 connection = pymongo.MongoClient('localhost', 27017)
