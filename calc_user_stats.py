@@ -15,6 +15,12 @@ from get_class_data import returnClassData
 from analyze_session import returnInsights
 from phone_lookup_whitepages import returnDataForNumber
 
+def get_pacific_time(time_str):
+
+    time_datetime = dateutil.parser.parse(time_str)
+    time_localized = pytz.utc.localize(time_datetime)
+    return time_localized.astimezone(pytz.timezone('US/Pacific'))
+
 # open/read config file
 old_time = ""
 
@@ -23,21 +29,17 @@ file_path = os.path.join(script_dir, "last_updated.txt")
 
 if os.path.isfile(file_path):
     with open (file_path, "r") as config_file:
-        old_time_str = config_file.read().replace('\n', '')
-        old_time_datetime = dateutil.parser.parse(old_time_str)
-        old_time_localized = pytz.utc.localize(old_time_datetime)
-        print "Old -- Pacific: %s  UTC: %s" % (old_time_localized.astimezone(pytz.timezone('US/Pacific')), old_time_str)
+        old_time = config_file.read().replace('\n', '')
+        print "Old -- Pacific: %s  UTC: %s" % (get_pacific_time(old_time), old_time)
 
-# record new last_updated time
-new_time_datetime = datetime.datetime.utcnow()
-new_time_str = new_time_datetime.isoformat()
-new_time_localized = pytz.utc.localize(new_time_datetime)
-print "New -- Pacific: %s  UTC: %s" % (new_time_localized.astimezone(pytz.timezone('US/Pacific')), new_time_str)
+# record/print new last_updated time
+new_time = datetime.datetime.utcnow().isoformat()
+print "New -- Pacific: %s  UTC: %s" % (get_pacific_time(new_time), new_time)
 
 # get data from Parse
-user_data = returnClassData("_User", sort_by="createdAt", last_updated=old_time_str, new_updated=new_time_str)
-link_data = returnClassData("Link", last_updated=old_time_str, new_updated=new_time_str)
-logs_data = returnClassData("Logs", last_updated=old_time_str, new_updated=new_time_str)
+user_data = returnClassData("_User", sort_by="createdAt", last_updated=old_time, new_updated=new_time)
+link_data = returnClassData("Link", last_updated=old_time, new_updated=new_time)
+logs_data = returnClassData("Logs", last_updated=old_time, new_updated=new_time)
 
 # exit if no data returned
 if user_data is None or link_data is None or logs_data is None:
@@ -49,7 +51,7 @@ if user_data is None or link_data is None or logs_data is None:
 
 # write new_time to config file
 with open (file_path, "w") as config_file:
-    config_file.write(new_time_str)
+    config_file.write(new_time)
     config_file.truncate()
 
 # initialization
