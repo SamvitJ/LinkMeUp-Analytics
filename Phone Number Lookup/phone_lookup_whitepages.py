@@ -10,6 +10,10 @@ def returnDataForNumber (mobile_number):
         with open(file_path, "r") as keys_file:
             keys = json.load(keys_file)
 
+    else:
+        print "Cannot find API key"
+        return None
+
     url = 'https://proapi.whitepages.com/2.1/phone.json'
     params = {
         'api_key': keys["whitepages"]["api-key"], 

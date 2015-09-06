@@ -45,6 +45,10 @@ def returnClassData (parse_class_name, sort_by="updatedAt", last_updated="", new
             with open(file_path, "r") as keys_file:
                 keys = json.load(keys_file)
 
+        else:
+            print "Cannot find API keys"
+            return None
+
         connection.connect()
         connection.request('GET', '/1/classes/%s?%s' % (parse_class_name, params), '', {
                "X-Parse-Application-Id": keys["parse"]["app-id"],

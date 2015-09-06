@@ -10,6 +10,10 @@ def returnDataForNumber (mobile_number):
         with open(file_path, "r") as keys_file:
             keys = json.load(keys_file)
 
+    else:
+        print "Cannot find API keys"
+        return None
+
     url = 'https://neutrinoapi.com/phone-validate'
     params = {
         'user-id': keys["neutrino"]["user-id"],
