@@ -1,5 +1,4 @@
 import sys
-
 from get_class_data import returnClassData
 
 def main(argv):
@@ -7,7 +6,6 @@ def main(argv):
    class_data = returnClassData(argv[1])
 
    for entry in class_data:
-
       print entry
 
 # execute main
