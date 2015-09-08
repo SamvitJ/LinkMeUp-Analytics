@@ -91,7 +91,6 @@ def index():
 
         # if location string/time code pair already contained, skip
         if any(loc[0] == location_str and loc[3] == time_code for loc in location_list):
-            # print "%s %s %u" % (user.get('username', None), location_str, time_code)
             continue
         
         # otherwise, add to list
