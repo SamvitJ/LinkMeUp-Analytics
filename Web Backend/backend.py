@@ -1,8 +1,8 @@
 import pymongo
 import json
 import datetime
-import time
 import pytz
+from operator import itemgetter
 from bottle import Bottle, request, response, run
 import cherrypy
 
@@ -36,10 +36,13 @@ def index():
     one_hour_ago = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
     # print "%s %s %s" % (one_day_ago, one_week_ago, one_hour_ago)
 
+    # sort list by createdAt
+    all_users_sorted = sorted(all_users, key=itemgetter('createdAt'), reverse=True)
+
     # create array of locations
     location_list = []
 
-    for user in all_users:
+    for user in all_users_sorted:
 
         # location str
         location_str = ""
@@ -89,8 +92,8 @@ def index():
         else:
             time_code = 3
 
-        # if location string/time code pair already contained, skip
-        if any(loc[0] == location_str and loc[3] == time_code for loc in location_list):
+        # if location string already contained, skip
+        if any(loc[0] == location_str for loc in location_list):
             continue
         
         # otherwise, add to list
