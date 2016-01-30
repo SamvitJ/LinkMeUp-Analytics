@@ -7,6 +7,9 @@ import os
 import datetime, pytz
 import json
 
+import locale
+locale.setlocale(locale.LC_ALL, ('en_US', 'utf-8'))
+
 import sys
 sys.path.insert(0, './Data Requests')
 sys.path.insert(0, './Phone Number Lookup')
@@ -49,14 +52,8 @@ if user_data is None or link_data is None or logs_data is None:
 # print "New link data: %s \n" % link_data
 # print "New logs data: %s \n" % logs_data
 
-# write new_time to config file
-with open (file_path, "w") as config_file:
-    config_file.write(new_time)
-    config_file.truncate()
-
 # initialization
 user_stats_list = []
-
 print "Number of new/updated users: %u" % len(user_data)
 
 # initialize mongo connection
@@ -112,7 +109,7 @@ for user in user_data:
     if user_stats["mobile_number"] is not None:
         
         file_path = os.path.join(script_dir, ("Whitepages Data/%s_phone_data" % user_username))
-        
+
         # data for user already exists
         if os.path.isfile(file_path):
             
@@ -121,7 +118,12 @@ for user in user_data:
 
         else: # look up phone number and save result to file
 
-            result = returnDataForNumber(user_stats["mobile_number"])
+            print user_stats["mobile_number"]
+
+            if user_stats["mobile_number"][:1] == "+":
+                result = returnDataForNumber(user_stats["mobile_number"][1:])
+            else:
+                result = returnDataForNumber(user_stats["mobile_number"])
 
             with open(file_path, 'w') as outfile:
                 json.dump(result, outfile)        
@@ -129,19 +131,21 @@ for user in user_data:
         # process result
         best_location = result["results"][0]["best_location"]
 
-        city = best_location["city"]
-        state = best_location["state_code"]
-        country = best_location["country_code"]
-        latitude = best_location["lat_long"]["latitude"]
-        longitude = best_location["lat_long"]["longitude"]
+        if best_location is not None:
 
-        user_stats["city"] = city
-        user_stats["state"] = state
-        user_stats["country"] = country
-        user_stats["latitude"] = latitude
-        user_stats["longitude"] = longitude
+            city = best_location["city"]
+            state = best_location["state_code"]
+            country = best_location["country_code"]
+            latitude = best_location["lat_long"]["latitude"]
+            longitude = best_location["lat_long"]["longitude"]
 
-        print "User: %s  Location: %s, %s, %s" % (user_username, city, state, country)
+            user_stats["city"] = city
+            user_stats["state"] = state
+            user_stats["country"] = country
+            user_stats["latitude"] = latitude
+            user_stats["longitude"] = longitude
+
+            print "User: %s  Location: %s, %s, %s" % (user_username, city, state, country)
 
     # add to user_stats_list
     user_stats_list.append(user_stats)
@@ -201,7 +205,15 @@ for log in logs_data:
 # user_stats_list_links = sorted(user_stats_list, key=itemgetter('links_sent'), reverse=True)
 # user_stats_list_sessions = sorted(user_stats_list, key=itemgetter('sessions'), reverse=True)
 
-# print list + insert into/update mongo database
+# write new_time to config file
+script_dir = os.path.dirname(__file__)
+file_path = os.path.join(script_dir, "last_updated.txt")
+
+with open (file_path, "w") as config_file:
+    config_file.write(new_time)
+    config_file.truncate()
+
+# insert into/update mongo database
 for user_stats in user_stats_list:
 
     user_id = user_stats.get('objectId', None)
@@ -253,8 +265,25 @@ for user_stats in user_stats_list:
                              "notifications": user_notifications,
                              "device_model": user_device_model})
 
+# print list
+for user_stats in user_stats_list:
+
+    user_id = user_stats.get('objectId', None)
+    user_username = user_stats.get('username', None)
+    user_createdAt = user_stats.get('createdAt', None)
+
+    user_links_sent = user_stats.get('links_sent', None)
+    user_sessions = user_stats.get('sessions', None)
+    user_verified = user_stats.get('verified', None)
+    user_notifications = user_stats.get('notifications', None)
+    user_device_model = user_stats.get('device_model', None)
+
+    user_city = user_stats.get('city', None)
+    user_state = user_stats.get('state', None)
+    user_country = user_stats.get('country', None)
+    user_latitude = user_stats.get('latitude', None)
+    user_longitude = user_stats.get('longitude', None)
+
     user_location_str = "%s, %s, %s" % (user_city[:12] if user_city is not None else user_city, user_state, user_country)
 
     print "%-20s  %-12s  Links sent: %-4u  Sessions: %-4u  Verified: %-7s  Notifs: %-7s  Device: %-11s  Location: %-22s" % (user_username[:18], user_id, user_links_sent, user_sessions, user_verified, user_notifications, user_device_model, user_location_str)
-
-

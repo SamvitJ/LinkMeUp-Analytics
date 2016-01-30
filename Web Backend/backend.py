@@ -103,6 +103,7 @@ def index():
     pacific = pytz.timezone("US/Pacific")
     print datetime.datetime.now(pacific)
 
+    location_list.reverse()
     return json.dumps({"locations": location_list})
 
 
