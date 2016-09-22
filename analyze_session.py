@@ -20,24 +20,19 @@ def returnInsights (session_logs):
 
       # notifications
       if notifications_none in log:
-
          insights["notifications"] = "Off"
 
       elif notifications_alert in log:
-
          insights["notifications"] = "Alert"
 
       elif any(str in log for str in [notifications_badge, notifications_sound, notifications_content]):
-
          insights["notifications"] = "Other"
 
       # device
       if device_model_4 in log:
-
          insights["device_model"] = "iPhone 4"
 
       elif device_model_5 in log:
-
          insights["device_model"] = "iPhone 5+"
 
    return insights 
