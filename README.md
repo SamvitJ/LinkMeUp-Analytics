@@ -1,4 +1,4 @@
-LinkMeUp-Analytics is the backend to a dynamic, Google Maps-based visualization of the LinkMeUp userbase.
+LinkMeUp-Analytics is the backend to a dynamic, Google Maps-based visualization of the LinkMeUp userbase (http://www.linkmeupmessenger.com/map/).
 
 **How it works**
 
