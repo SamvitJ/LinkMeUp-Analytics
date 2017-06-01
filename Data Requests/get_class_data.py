@@ -13,7 +13,7 @@ def returnClassData (parse_class_name, sort_by="updatedAt", last_updated="", new
 
     while True:
 
-        connection = httplib.HTTPSConnection('api.parse.com', 443)
+        connection = httplib.HTTPSConnection('linkmeup-prod.herokuapp.com', 443)
 
         # create parameter dictionary
         params_dict = {
@@ -50,9 +50,8 @@ def returnClassData (parse_class_name, sort_by="updatedAt", last_updated="", new
             return None
 
         connection.connect()
-        connection.request('GET', '/1/classes/%s?%s' % (parse_class_name, params), '', {
-               "X-Parse-Application-Id": keys["parse"]["app-id"],
-               "X-Parse-REST-API-Key": keys["parse"]["api-key"]
+        connection.request('GET', '/parse/classes/%s?%s' % (parse_class_name, params), '', {
+               "X-Parse-Application-Id": keys["parse"]["app-id"]
              })
         result = json.loads(connection.getresponse().read())
 
