@@ -14,16 +14,16 @@ def returnDataForNumber (mobile_number):
         print "Cannot find API key"
         return None
 
-    url = 'https://proapi.whitepages.com/2.1/phone.json'
+    url = "https://proapi.whitepages.com/3.0/phone.json"
     params = {
         'api_key': keys["whitepages"]["api-key"], 
-        'phone_number': mobile_number
+        'phone': mobile_number
     }
     
     # print urllib.urlencode(params)
     # req = urllib2.Request(url, urllib.urlencode(params))
     
-    req = urllib2.Request(url + '?api_key=' + params['api_key'] + '&phone_number=' + params['phone_number'])
+    req = urllib2.Request(url + '?api_key=' + params['api_key'] + '&phone=' + params['phone'])
     
     response = urllib2.urlopen(req)
     result = json.loads(response.read())

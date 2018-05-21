@@ -129,7 +129,22 @@ for user in user_data:
                 json.dump(result, outfile)        
 
         # process result
-        best_location = result["results"][0]["best_location"]
+        best_location = {}
+        if 'current_addresses' in result: # api v3
+            print user_stats["username"], result
+            if not result['id']:
+                continue
+            best_location = result['current_addresses'][0]
+        elif 'results' in result: # api v2
+            entry = result['results'][0]
+            if entry.get("best_location", None):
+                best_location = entry["best_location"]
+            elif entry.get("associated_locations", None):
+                best_location = entry["associated_locations"][0]
+            else:
+                continue
+        else:
+            continue
 
         if best_location is not None:
 
